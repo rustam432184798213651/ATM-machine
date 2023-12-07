@@ -6,11 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATM_machine
 {
-    internal class Program
+    internal class Controllers
     {
-        static void Main(string[] args)
-        {
-            
-        }
     }
 }

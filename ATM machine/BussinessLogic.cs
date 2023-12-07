@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace ATM_machine
 {
-    internal class Program
+    internal class BussinessLogic
     {
-        static void Main(string[] args)
-        {
-            
-        }
+
     }
 }

@@ -92,6 +92,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BussinessLogic.cs" />
+    <Compile Include="CLI.cs" />
+    <Compile Include="Controllers.cs" />
     <Compile Include="ORM.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
