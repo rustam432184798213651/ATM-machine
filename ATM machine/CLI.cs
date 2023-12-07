@@ -9,10 +9,7 @@ namespace ATM_machine
     /*
         CLI = Command-line interface
     */
-    interface ICLI
-    {
-        
-    }
+   
 
     /*
         State Pattern 
