@@ -16,8 +16,19 @@ namespace ATM_machine
         and 
         Template method pattern
     */
-    internal class CLI
+    public class CLI
     {
+        public CLI() 
+        {
+            classForValidationOfData = new ClassForValidationOfData
+            {
+                controller = new ControllerForCheckingIfTheAnswerForChoosingUserStageIsCorrect()
+            };
+            currentBussinessLogic = new CurrentLogic
+            {
+                bussinessLogic = new LogicForChoosingUserStage { }
+            };
+        }
 
         private enum AnswerToDoYouWantTo
         {
@@ -25,16 +36,29 @@ namespace ATM_machine
             log_in,
             exit
         }
-        public void Authentification()
+        public void Run()
         {
-          
-            Console.WriteLine("Do you want to: ");
-            Console.WriteLine("1. sign up");
-            Console.WriteLine("2. log in");
-            Console.WriteLine("3. exit");
-            int answer = Convert.ToInt16(Console.ReadKey().KeyChar);
-            
+            string question = currentBussinessLogic.Generate_question();
+            string answer;
+            while (true)
+            {
+                Console.WriteLine(question);
+                answer = Console.ReadLine();
+                if (classForValidationOfData.Check(answer))
+                {
+                    currentBussinessLogic.Execution_for_the_correct_answer(answer);
+                    question = currentBussinessLogic.Generate_question();
+                }
+                else
+                {
+                    question = currentBussinessLogic.Generate_question_after_receiving_incorrect_answer();
+                }
+            }
 
         }
+        CurrentLogic currentBussinessLogic;
+        ClassForValidationOfData classForValidationOfData = new ClassForValidationOfData { };
+
+
     }
 }
