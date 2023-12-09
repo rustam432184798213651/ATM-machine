@@ -18,6 +18,7 @@ namespace ATM_machine
         internal ORM database = ORM.GetInstance();
         internal IBussinessLogic bussinessLogic;
         internal string currentUser = "";
+        internal string currentAccountNumber = "";
     }
 
     internal interface IBussinessLogic
@@ -221,8 +222,25 @@ namespace ATM_machine
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            int amountOfMoneyToWithdraw = Convert.ToInt16(answer);
-// currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, )
+            string amountOfMoneyToWithdraw = answer;
+            currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw);
+        }
+    }
+
+    internal class LogicForCheckBalance : IBussinessLogic
+    {
+        public string Generate_question()
+        {
+            return "If you want to return to previous list of choices then write \"exit\"\nYour balance:";
+        }
+        public string Generate_question_after_receiving_incorrect_answer()
+        {
+            return "You does not have such amount of money. Please try again.\n" + Generate_question();
+        }
+        public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
+        {
+            string amountOfMoneyToWithdraw = answer;
+            currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw)
         }
     }
 

@@ -17,6 +17,18 @@ namespace ATM_machine
         private ORM() { this.GetConnection(); }
         static  ORM objectForStoringDatabase = new ORM { };
         public static ORM GetInstance() { return objectForStoringDatabase; }
+        public void WithdrawMoneyFromAccountNumber(string currentUser, string currentAccountNumber, string amountOfMoneyToWithdraw)
+        {
+            database.Open();
+            NpgsqlCommand commandToExecute = new NpgsqlCommand
+            {
+                Connection = database,
+                CommandText = "UPDATE " + nameOfTableForAccountNumbers + " SET balance = balance - " + amountOfMoneyToWithdraw + " WHERE account_name = " + "'"+currentUser+"'"+" AND " + "account_number = " + "'" +currentAccountNumber+"'"+";"
+            };
+            commandToExecute.ExecuteNonQuery();
+            database.Close();
+        }
+
         public void InsertNewAccount(string nameOfAccount, string passwordOfAccount)
         {
             database.Open();
