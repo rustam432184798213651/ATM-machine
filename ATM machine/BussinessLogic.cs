@@ -83,6 +83,7 @@ namespace ATM_machine
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
+            
             if (answer == "1") 
             {
                 currentLogic.bussinessLogic = new LogicForSignUpStage { };
@@ -99,11 +100,11 @@ namespace ATM_machine
     { 
         public string Generate_question()
         {
-            return "Enter your Username then your password separated by comma. . If you want to return to previous list of choices then write \"exit\":";
+            return "Enter your Username then your password separated by comma. Username and password cannot contain commas. If you want to return to previous list of choices then write \"exit\":";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Written Username is already used. Please try again.\n" + Generate_question();
+            return "Format of Username or password is incorrect or someone else is already using such username. Please try again with diffrent input\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
@@ -129,24 +130,61 @@ namespace ATM_machine
     {
         public string Generate_question()
         {
-            return "Enter your username then password. If you want to return to previous list of choices then write \"exit\"";
+            return "Enter your Username then your password separated by comma. Username and password cannot contain commas. If you want to return to previous list of choices then write \"exit\"";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Username or password is incorrect. Please try again\n" + Generate_question();
+            return "Format of Username or password is incorrect or someone else is already using such username. Please try again with diffrent input\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
             if (answer == "exit") currentLogic.bussinessLogic = new LogicForAuthentificationStage() { };
-            else { currentLogic.currentUser = answer.Substring(0, answer.IndexOf(',')); currentLogic.bussinessLogic = new LogicForWorkingWithAccountNumber { }; }
+            else 
+            { 
+                currentLogic.currentUser = answer.Substring(0, answer.IndexOf(',')); currentLogic.bussinessLogic = new LogicForCreatingOrEnteringAccountNumber { }; 
+            }
         }
     }
 
+    internal class LogicForCreatingOrEnteringAccountNumber : IBussinessLogic
+    {
+        public string Generate_question()
+        {
+            return "If you want to return to previous list of choices then write \"exit\"\nChoose what would you like to do:\n1. Create account number\n2. Enter existing account number";
+        }
+        public string Generate_question_after_receiving_incorrect_answer()
+        {
+            return "You should choose one or two. Please try again with diffrent input\n" + Generate_question();
+        }
+        public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
+        {
+            if (answer == "exit") currentLogic.bussinessLogic = new LogicForAuthentificationStage() { };
+            else
+            {
+                if(answer == "1")
+                { 
+                  currentLogic.bussinessLogic = new LogicForCreatingAccountNumber { };
+                }
+                else if (answer == "2")
+                {
+                    currentLogic.bussinessLogic = new LogicForChoosingAccountNumber { };
+                }
+            }
+        }
+    }
+    public enum listOfChoicesForWorkingWithAccountNumber
+    {
+
+        CheckBalance = 1,
+        PayMoneyIn,
+        MakeAWithrawal,
+        CheckBalanceHistory
+    }
     internal class LogicForLoggedAccount : IBussinessLogic
     {
         public string Generate_question()
         {
-            return "If you want to return to previous list of choices then write \"exit\"\nWould you like to:\n1. Create account number\n2. Check balance\n3. Pay money in\n4. Make a withdrawal\n5. Check balance history";
+            return "If you want to return to previous list of choices then write \"exit\"\nWould you like to:\n1. Check balance\n2. Pay money in\n3. Make a withdrawal\n4. Check balance history";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
@@ -157,18 +195,27 @@ namespace ATM_machine
         {
             if (answer == "exit")
             {
-                currentLogic.bussinessLogic = new LogicForLoggedAccount();
+                currentLogic.bussinessLogic = new LogicForChoosingAccountNumber();
             }
             else
             {
                 switch (Convert.ToInt16(answer))
                 {
-                    case (int)listOfChoicesForWorkingWithAccountNumber.CreateAccountNumber:
-                        currentLogic.bussinessLogic = new LogicForCreatingAccountNumber { };
-                        break;
+                    
                     case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalance:
-                        CLI.getOutputFromBussinessLogic("Your balance is " + currentLogic.database.GetBalance(currentLogic.currentUser, currentLogic.currentAccountNumber).ToString());
-                        CLI.showOutputFromBussinessLogic();
+                        CLI.GetInstance().getOutputFromBussinessLogic("Your balance is " + currentLogic.database.GetBalance(currentLogic.currentUser, currentLogic.currentAccountNumber).ToString());
+                        CLI.GetInstance().showOutputFromBussinessLogic();
+                        break;
+                    case (int)listOfChoicesForWorkingWithAccountNumber.MakeAWithrawal:
+                        currentLogic.bussinessLogic = new LogicForMakeAWithdrawal {};
+                        break;
+                    case (int)listOfChoicesForWorkingWithAccountNumber.PayMoneyIn:
+                        currentLogic.bussinessLogic = new LogicForPutMoneyIn();
+                        break;
+                    case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalanceHistory:
+                        string history =  currentLogic.database.GetOperationsWithAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber);
+                        CLI.GetInstance().getOutputFromBussinessLogic(history);
+                        CLI.GetInstance().showOutputFromBussinessLogic();
                         break;
                         /*              case (int)listOfChoicesForWorkingWithAccountNumber.PayMoneyIn:
                                           currentLogic.bussinessLogic = new LogicForPayMoneyIn { };
@@ -183,16 +230,9 @@ namespace ATM_machine
             }
         }
     }
-    public enum listOfChoicesForWorkingWithAccountNumber
-    {
-        CreateAccountNumber = 1,
-        CheckBalance,
-        PayMoneyIn,
-        MakeAWithrawal,
-        CheckBalanceHistory
-    }
+  
 
-    internal class LogicForWorkingWithAccountNumber : IBussinessLogic
+    internal class LogicForChoosingAccountNumber : IBussinessLogic
     {
         public string Generate_question()
         {
@@ -200,14 +240,21 @@ namespace ATM_machine
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Username or pincode is incorrect. Please try again\n" + Generate_question();
+            return "Account number or pincode is incorrect. Please try again\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            string accountNumber = answer.Substring(0, answer.IndexOf(","));
-            string pincode = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
-            currentLogic.currentAccountNumber = accountNumber;
-            currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            if(answer == "exit")
+            {
+                currentLogic.bussinessLogic = new LogicForCreatingOrEnteringAccountNumber { };
+            }
+            else 
+            { 
+                string accountNumber = answer.Substring(0, answer.IndexOf(","));
+                string pincode = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
+                currentLogic.currentAccountNumber = accountNumber;
+                currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            }
         }
     
 
@@ -226,25 +273,38 @@ namespace ATM_machine
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
+            if (answer == "exit")
+            {
+                currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            }
+            else 
+            { 
             string amountOfMoneyToWithdraw = answer;
             currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw);
+            }
         }
     }
-
-    internal class LogicForCheckBalance : IBussinessLogic
+    internal class LogicForPutMoneyIn : IBussinessLogic
     {
         public string Generate_question()
         {
-            return "Are you sure you want to display your balance on the console? If you want to return to previous stage enter \"exit\"\n1. Yes";
+            return "Enter how much money you want to put into bank account. If you want to return to previous list of choices then write \"exit\"";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Your input is incorrect. Please try again.\n" + Generate_question();
+            return "You should put number and only number. Please try again.\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            string amountOfMoneyToWithdraw = answer;
-            currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw);
+            if (answer == "exit")
+            {
+                currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            }
+            else
+            {
+                string amountOfMoneyToPutIn = answer;
+                currentLogic.database.PutMoneyIntoAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToPutIn);
+            }
         }
     }
 
@@ -256,14 +316,22 @@ namespace ATM_machine
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Username or pincode have to contain at least one character each. Please try again\n" + Generate_question();
+            return "Account number and pincode have to be represented as numbers. Please try again\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            string accountNumber = answer.Substring(0, answer.IndexOf(","));
-            string pincode = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
-            currentLogic.database.InsertAccountNumberIntoTableOfAccountNUmbers(currentLogic.currentUser, accountNumber, pincode);
-            currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            if (answer == "exit")
+            {
+                currentLogic.bussinessLogic = new LogicForCreatingOrEnteringAccountNumber { };
+            }
+            else 
+            { 
+                string accountNumber = answer.Substring(0, answer.IndexOf(","));
+                string pincode = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
+                currentLogic.currentAccountNumber = accountNumber;
+                currentLogic.database.InsertAccountNumberIntoTableOfAccountNumbers(currentLogic.currentUser, accountNumber, pincode);
+                currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            }
         }
     }
 }

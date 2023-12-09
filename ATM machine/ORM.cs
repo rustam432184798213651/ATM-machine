@@ -23,12 +23,37 @@ namespace ATM_machine
             NpgsqlCommand commandToExecute = new NpgsqlCommand
             {
                 Connection = database,
-                CommandText = "UPDATE " + nameOfTableForAccountNumbers + " SET balance = balance - " + amountOfMoneyToWithdraw + " WHERE account_name = " + "'"+currentUser+"'"+" AND " + "account_number = " + "'" +currentAccountNumber+"'"+";"
+                CommandText = "UPDATE " + nameOfTableForAccountNumbers + " SET account_balance = account_balance - " + amountOfMoneyToWithdraw + " WHERE account_name = " + "'"+currentUser+"'"+" AND " + "account_number = " + "'" +currentAccountNumber+"'"+";"
+
             };
             commandToExecute.ExecuteNonQuery();
+            NpgsqlCommand commandForHistory = new NpgsqlCommand
+            {
+                Connection = database,
+                CommandText = "INSERT INTO " + nameOfTableForAccountNumbersHistory + " (account_name, account_number, account_number_history)" + " VALUES" + " ('"+currentUser+"', '"+currentAccountNumber+"'" +", '" + amountOfMoneyToWithdraw.ToString()+ " was withdrawn' )"
+            };
+            commandForHistory.ExecuteNonQuery();
             database.Close();
         }
 
+        public void PutMoneyIntoAccountNumber(string currentUser, string currentAccountNumber, string amountOfMoneyToPutIn)
+        {
+            database.Open();
+            NpgsqlCommand commandToExecute = new NpgsqlCommand
+            {
+                Connection = database,
+                CommandText = "UPDATE " + nameOfTableForAccountNumbers + " SET account_balance = account_balance + " + amountOfMoneyToPutIn + " WHERE account_name = " + "'" + currentUser + "'" + " AND " + "account_number = " + "'" + currentAccountNumber + "'" + ";"
+
+            };
+            commandToExecute.ExecuteNonQuery();
+            NpgsqlCommand commandForHistory = new NpgsqlCommand
+            {
+                Connection = database,
+                CommandText = "INSERT INTO " + nameOfTableForAccountNumbersHistory + " (account_name, account_number, account_number_history)" + " VALUES" + " ('" + currentUser + "', '" + currentAccountNumber + "'" + ", '" + amountOfMoneyToPutIn.ToString() + " was put in' )"
+            };
+            commandForHistory.ExecuteNonQuery();
+            database.Close();
+        }
         public void InsertNewAccount(string nameOfAccount, string passwordOfAccount)
         {
             database.Open();
@@ -38,6 +63,7 @@ namespace ATM_machine
                 CommandText = "INSERT INTO " + nameOfTable + " (name_of_account, password_of_account) VALUES ('" + nameOfAccount + "' , '" + passwordOfAccount + "')"
 
             };
+            
             commandToExecute.ExecuteNonQuery();
             database.Close();
         }
@@ -72,7 +98,25 @@ namespace ATM_machine
             return balance;
 
         }
-        public bool InsertAccountNumberIntoTableOfAccountNUmbers(string accountName, string accountNumber, string pincode)
+        public string GetOperationsWithAccountNumber(string accountName, string accountNumber)
+        {
+            database.Open();
+            NpgsqlCommand commandToExecute = new NpgsqlCommand
+            {
+                Connection = database,
+                CommandText = "SELECT * FROM " + nameOfTableForAccountNumbersHistory + " WHERE " +"account_name = '"+ accountName +"' AND account_number = '"+accountNumber+"' ;" 
+
+            };
+            NpgsqlDataReader dr = commandToExecute.ExecuteReader();
+            string result = "";
+            while (dr.Read())
+            {
+                result += dr["account_number_history"] + "\n" ;
+            }
+            database.Close();
+            return result;
+        }
+        public bool InsertAccountNumberIntoTableOfAccountNumbers(string accountName, string accountNumber, string pincode)
         {
             database.Open();
             NpgsqlCommand commandToExecute = new NpgsqlCommand
@@ -136,6 +180,7 @@ namespace ATM_machine
         private const string nameOfDatabase = "DatabaseForAccounts";
         private const string nameOfTable = "accounts";
         private const string nameOfTableForAccountNumbers = "account_numbers";
+        private const string nameOfTableForAccountNumbersHistory = "account_numbers_history";
         private NpgsqlConnection database;
     }
 }

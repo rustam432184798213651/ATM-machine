@@ -18,7 +18,12 @@ namespace ATM_machine
     */
     public class CLI
     {
-        public CLI() 
+        static public CLI GetInstance()
+        {
+            return cli;
+        }
+        static private CLI cli = new CLI { }; 
+        private CLI() 
         {
             classForValidationOfData = new ClassForValidationOfData
             {
@@ -29,12 +34,12 @@ namespace ATM_machine
                 bussinessLogic = new LogicForChoosingUserStage { }
             };
         }
-        private static string outputFromBussinessLogic = "";
-        public static void getOutputFromBussinessLogic(string output)
+        private  string outputFromBussinessLogic = "";
+        public  void getOutputFromBussinessLogic(string output)
         {
             outputFromBussinessLogic = output;
         }
-        public static void showOutputFromBussinessLogic()
+        public  void showOutputFromBussinessLogic()
         {
             Console.WriteLine(outputFromBussinessLogic);
         }
