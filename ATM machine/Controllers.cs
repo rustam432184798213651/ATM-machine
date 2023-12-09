@@ -17,9 +17,10 @@ namespace ATM_machine
         }
         internal ClassForValidationOfData() { controller = new ControllerForCheckingIfTheAnswerForChoosingUserStageIsCorrect {}; }
         public bool Check(string answer) { return controller.Check(answer, this); }
+        internal string currentUser = "";
         internal IController controller;
-        internal IController previousStateOfController;
     }
+
 
     interface IController
     {
@@ -56,7 +57,6 @@ namespace ATM_machine
     {
         public bool Check(string answer, ClassForValidationOfData classForValidationOfData)
         {
-            return true;
             if (answer == "exit" )
             {
                 classForValidationOfData.controller = new ControllerForCheckingIfTheAnswerForAuthentificationStageIsCorrect { };
@@ -84,10 +84,14 @@ namespace ATM_machine
                 }
             }
 
-            
 
-            if (number_of_characters_after_comma >= 1 && number_of_characters_before_comma >= 1)
+
+            string username = answer.Substring(0, answer.IndexOf(","));
+            string password = answer.Substring(answer.IndexOf(",") + 1);
+            if (number_of_characters_after_comma >= 1 && number_of_characters_before_comma >= 1 && !ORM.GetInstance().CheckIfThePasswordSuitUsername(username, password))
             {
+                classForValidationOfData.currentUser = username;
+                classForValidationOfData.controller = new ControllerForChoosingAccountNumber { };
                 return true;
             }
 
@@ -96,6 +100,27 @@ namespace ATM_machine
             return false;
         }
     }
+    internal class ControllerForChoosingAccountNumber : IController
+    {
+        public bool Check(string answer, ClassForValidationOfData classForValidationOfData)
+        {
+            if (answer == "exit")
+            {
+                classForValidationOfData.controller = new ControllerForCheckingIfTheAnswerForLogInStageIsCorrect { };
+                return true;
+            }
+            string accountNumber = answer.Substring(0, answer.IndexOf(","));
+          
+            if (ORM.GetInstance().CheckIfTheAccountNumberInTableOfAccountNumbers(classForValidationOfData.currentUser, accountNumber))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+    }
+
     internal class ControllerForCheckingIfTheAnswerForSignUpStageIsCorrect : IController
     {
         public bool Check(string answer, ClassForValidationOfData classForValidationOfData)
@@ -147,6 +172,8 @@ namespace ATM_machine
             return answer.Length > 0;
         }
     }
+
+
 
 
 }

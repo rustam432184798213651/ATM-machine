@@ -29,6 +29,15 @@ namespace ATM_machine
                 bussinessLogic = new LogicForChoosingUserStage { }
             };
         }
+        private static string outputFromBussinessLogic = "";
+        public static void getOutputFromBussinessLogic(string output)
+        {
+            outputFromBussinessLogic = output;
+        }
+        public static void showOutputFromBussinessLogic()
+        {
+            Console.WriteLine(outputFromBussinessLogic);
+        }
 
         private enum AnswerToDoYouWantTo
         {

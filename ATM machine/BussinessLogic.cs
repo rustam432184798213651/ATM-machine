@@ -19,6 +19,7 @@ namespace ATM_machine
         internal IBussinessLogic bussinessLogic;
         internal string currentUser = "";
         internal string currentAccountNumber = "";
+
     }
 
     internal interface IBussinessLogic
@@ -145,17 +146,41 @@ namespace ATM_machine
     {
         public string Generate_question()
         {
-            return "Enter your account number then pincode separated by comma. If you want to return to previous list of choices then write \"exit\"";
+            return "If you want to return to previous list of choices then write \"exit\"\nWould you like to:\n1. Create account number\n2. Check balance\n3. Pay money in\n4. Make a withdrawal\n5. Check balance history";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Username or pincode is incorrect. Please try again\n" + Generate_question();
+            return "Your input is incorrect. Please try again\n" + Generate_question();
         }
+
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            string username = answer.Substring(0,answer.IndexOf(","));
-            string password = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
-            if (currentLogic.database.CheckIfThePasswordSuitUsername(username, password)) currentLogic.bussinessLogic = new LogicForLoggedAccount { };
+            if (answer == "exit")
+            {
+                currentLogic.bussinessLogic = new LogicForLoggedAccount();
+            }
+            else
+            {
+                switch (Convert.ToInt16(answer))
+                {
+                    case (int)listOfChoicesForWorkingWithAccountNumber.CreateAccountNumber:
+                        currentLogic.bussinessLogic = new LogicForCreatingAccountNumber { };
+                        break;
+                    case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalance:
+                        CLI.getOutputFromBussinessLogic("Your balance is " + currentLogic.database.GetBalance(currentLogic.currentUser, currentLogic.currentAccountNumber).ToString());
+                        CLI.showOutputFromBussinessLogic();
+                        break;
+                        /*              case (int)listOfChoicesForWorkingWithAccountNumber.PayMoneyIn:
+                                          currentLogic.bussinessLogic = new LogicForPayMoneyIn { };
+                                          break;
+                                      case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalanceHistory:
+                                          currentLogic.bussinessLogic = new LogicForCheckBalanceHistory { };
+                                          break;
+                                      case (int)listOfChoicesForWorkingWithAccountNumber.MakeAWithrawal:
+                                          currentLogic.bussinessLogic = new LogicForMakeAWithrawal { };
+                                          break;*/
+                }
+            }
         }
     }
     public enum listOfChoicesForWorkingWithAccountNumber
@@ -171,41 +196,20 @@ namespace ATM_machine
     {
         public string Generate_question()
         {
-            return "If you want to return to previous list of choices then write \"exit\"\nWould you like to:\n1. Create account number\n2. Check balance\n3.Pay money in\n4. Make a withdrawal\n5. Check balance history";
+            return "Enter your account number then pincode separated by comma. If you want to return to previous list of choices then write \"exit\"";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "Your input is incorrect. Please try again\n" + Generate_question();
+            return "Username or pincode is incorrect. Please try again\n" + Generate_question();
         }
-        
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            if(answer == "exit")
-            {
-                currentLogic.bussinessLogic = new LogicForLoggedAccount();
-            }
-            else
-            {
-                switch (Convert.ToInt16(answer))
-                {
-                    case (int)listOfChoicesForWorkingWithAccountNumber.CreateAccountNumber:
-                        currentLogic.bussinessLogic = new LogicForCreatingAccountNumber { };
-                        break;
-                    case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalance:
-                        currentLogic.bussinessLogic = new LogicForCheckBalance { };
-                        break;
-                    case (int)listOfChoicesForWorkingWithAccountNumber.PayMoneyIn:
-                        currentLogic.bussinessLogic = new LogicForPayMoneyIn { };
-                        break;
-                    case (int)listOfChoicesForWorkingWithAccountNumber.CheckBalanceHistory:
-                        currentLogic.bussinessLogic = new LogicForCheckBalanceHistory { };
-                        break;
-                    case (int)listOfChoicesForWorkingWithAccountNumber.MakeAWithrawal:
-                        currentLogic.bussinessLogic = new LogicForMakeAWithrawal { };
-                        break;
-                }
-            }
+            string accountNumber = answer.Substring(0, answer.IndexOf(","));
+            string pincode = answer.Substring(answer.IndexOf(",") + 1, answer.Length - 1 - answer.IndexOf(","));
+            currentLogic.currentAccountNumber = accountNumber;
+            currentLogic.bussinessLogic = new LogicForLoggedAccount { };
         }
+    
 
 
     }
@@ -231,16 +235,16 @@ namespace ATM_machine
     {
         public string Generate_question()
         {
-            return "If you want to return to previous list of choices then write \"exit\"\nYour balance:";
+            return "Are you sure you want to display your balance on the console? If you want to return to previous stage enter \"exit\"\n1. Yes";
         }
         public string Generate_question_after_receiving_incorrect_answer()
         {
-            return "You does not have such amount of money. Please try again.\n" + Generate_question();
+            return "Your input is incorrect. Please try again.\n" + Generate_question();
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
             string amountOfMoneyToWithdraw = answer;
-            currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw)
+            currentLogic.database.WithdrawMoneyFromAccountNumber(currentLogic.currentUser, currentLogic.currentAccountNumber, amountOfMoneyToWithdraw);
         }
     }
 
