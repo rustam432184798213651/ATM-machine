@@ -61,10 +61,7 @@ namespace ATM_machine
         }
     }
 
-    enum enumForLogicForSystemAdminStage
-    {
 
-    }
 
     internal class LogicForSystemAdminStage : IBussinessLogic
     {
@@ -82,6 +79,12 @@ namespace ATM_machine
             if (answer == "exit") currentLogic.bussinessLogic = new LogicForAuthentificationStage { };
         }
     }
+    enum enumForLogicForAuthentificationStage
+    {
+        WantsToSignUp = 1,
+        WantsToLogIn,
+        WantsToExit
+    }
 
     internal class LogicForAuthentificationStage : IBussinessLogic
     {
@@ -96,15 +99,12 @@ namespace ATM_machine
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
             
-            if (answer == "1") 
-            {
+            if (answer == enumForLogicForAuthentificationStage.WantsToSignUp.ToString()) 
                 currentLogic.bussinessLogic = new LogicForSignUpStage { };
-            }
-            if (answer == "2") 
-            {
+            if (answer == enumForLogicForAuthentificationStage.WantsToLogIn.ToString()) 
                 currentLogic.bussinessLogic = new LogicForLogInStage { };
-            }
-            if (answer == "3") currentLogic.bussinessLogic = new LogicForChoosingUserStage { };
+            if (answer == enumForLogicForAuthentificationStage.WantsToExit.ToString()) 
+                currentLogic.bussinessLogic = new LogicForChoosingUserStage { };
         }
     }
 
