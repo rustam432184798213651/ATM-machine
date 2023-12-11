@@ -12,7 +12,7 @@ namespace ATM_machine
     internal class CurrentLogic
     {
         public CurrentLogic() { bussinessLogic = new LogicForChoosingUserStage { }; }
-        public string Generate_question() { return bussinessLogic.Generate_question();}
+        public string Generate_question() { return bussinessLogic.Generate_question(); }
         public string Generate_question_after_receiving_incorrect_answer() { return bussinessLogic.Generate_question_after_receiving_incorrect_answer(); }
         public void Execution_for_the_correct_answer(string answer) { bussinessLogic.Execution_for_the_correct_answer(answer, this); }
         internal ORM database = ORM.GetInstance();
@@ -24,14 +24,21 @@ namespace ATM_machine
 
     internal interface IBussinessLogic
     {
-        string Generate_question ();
+        string Generate_question();
         string Generate_question_after_receiving_incorrect_answer();
         void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic);
-       
+
     }
 
+
+    enum enumForLogicForChossingUserStage
+    {
+        WantsToEnterAsUser = 1,
+        WantsToEnterAsSystemAdmin 
+    }
     internal class LogicForChoosingUserStage : IBussinessLogic
     {
+        
         public string Generate_question()
         {
             return "Would you like to enter as a:\n1. User\n2. System admin";
@@ -42,16 +49,21 @@ namespace ATM_machine
         }
         public void Execution_for_the_correct_answer(string answer, CurrentLogic currentLogic)
         {
-            if(answer == "1")
+            if(answer == enumForLogicForChossingUserStage.WantsToEnterAsUser.ToString())
             { 
                 currentLogic.bussinessLogic = new LogicForAuthentificationStage {};
                 
             }
-            if (answer == "2")
+            if (answer == enumForLogicForChossingUserStage.WantsToEnterAsSystemAdmin.ToString())
             {
                 currentLogic.bussinessLogic = new LogicForSystemAdminStage {};
             }
         }
+    }
+
+    enum enumForLogicForSystemAdminStage
+    {
+
     }
 
     internal class LogicForSystemAdminStage : IBussinessLogic
